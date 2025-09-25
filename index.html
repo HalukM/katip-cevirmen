@@ -290,7 +290,7 @@
                     statusDiv.textContent = uiStrings.statusStopped[uiLangSelector.value];
                     startButton.disabled = false;
                     stopButton.disabled = true;
-                    transcriptDiv.innerText = final_transcript.trim(); // Clean up final text
+                    transcriptDiv.innerText = final_transcript.trim();
                     transcriptDiv.contentEditable = true;
                     transcriptDiv.classList.add('ring-2', 'ring-cyan-400', 'cursor-text');
                     transcriptDiv.focus();
@@ -301,7 +301,6 @@
             };
 
             recognition.onerror = (event) => {
-                // Silently ignore 'no-speech' and 'audio-capture' errors, as they are common and the onend event will handle restarting.
                 if (event.error === 'no-speech' || event.error === 'audio-capture') {
                     console.warn('Speech recognition error ignored:', event.error);
                     return;
@@ -337,7 +336,6 @@
                 recognition.stop();
             });
             
-            // Event Listeners for buttons and inputs
             copyButton.addEventListener('click', () => copyText(transcriptDiv.innerText, copyButton));
             shareButton.addEventListener('click', () => {
                 const textToShare = (transcriptDiv.innerText.replace(imageUrlRegex, '').replace(/\s+/g, ' ').trim() + ' ' + originalImageUrls.join(' ')).trim();
@@ -352,7 +350,7 @@
             shareTranslatedButton.addEventListener('click', () => {
                 const textToShare = (translatedTextDiv.innerText.replace(imageUrlRegex, '').replace(/\s+/g, ' ').trim() + ' ' + translatedImageUrls.join(' ')).trim();
                 shareText(textToShare);
-});
+            });
             speakTranslatedButton.addEventListener('click', () => {
                 const textToSpeak = translatedTextDiv.innerText.replace(imageUrlRegex, '').trim();
                 handleSpeech(textToSpeak, speechLangCodes[targetLangSelector.value], speakTranslatedButton);
@@ -387,42 +385,21 @@
 
                 const translateButtonSpan = translateButton.querySelector('span');
                 const originalButtonText = translateButtonSpan.textContent;
-                translateButton.querySelector('svg').style.display = 'none';
+                translateButton.querySelector('svg')?.remove();
                 translateButton.insertAdjacentHTML('afterbegin', spinnerIconSVG);
                 translateButtonSpan.textContent = uiStrings.translating[lang];
                 translateButton.disabled = true;
 
                 try {
-                    const apiKey = "";
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-                    
                     let translated = '';
                     if (textToTranslate) {
-                        const sourceLangName = languages[sourceLangSelector.value];
-                        const targetLangName = languages[targetLangSelector.value];
-                        const prompt = `Translate the following text accurately from ${sourceLangName} to ${targetLangName}. Respond ONLY with the translated text, without any introductory phrases or explanations. The text to translate is: "${textToTranslate}"`;
-                        
-                        const payload = {
-                            contents: [{ parts: [{ text: prompt }] }]
-                        };
-
-                        const response = await fetch(apiUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-                         if (!response.ok) {
-                            const errorBody = await response.text();
-                            console.error('API Error Response:', errorBody);
-                            throw new Error(`API error: ${response.status} ${response.statusText}`);
-                        }
-                        
-                        const result = await response.json();
-                        translated = result.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
-                         if (!translated) {
-                            console.error("Invalid response structure from API:", result);
-                            throw new Error("Invalid response from API.");
-                        }
+                        const sourceLang = sourceLangSelector.value;
+                        const targetLang = targetLangSelector.value;
+                        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(textToTranslate)}`;
+                        const response = await fetch(url);
+                        if (!response.ok) throw new Error('Translation API request failed');
+                        const data = await response.json();
+                        if (data && data[0]) data[0].forEach(segment => { if (segment[0]) translated += segment[0]; });
                     }
                     
                     const urlsToAppend = originalImageUrls.join(' ');
@@ -439,9 +416,9 @@
                     console.error('Translation Error:', error);
                     showTemporaryStatus(uiStrings.errorTranslation[lang]);
                 } finally {
+                    translateButton.querySelector('.spinner')?.remove();
+                    translateButton.insertAdjacentHTML('afterbegin', `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22l-2-2 2-2"></path><path d="M20 12l2-2-2-2"></path><path d="M2 12l2 2-2 2"></path><path d="M12 2l2 2-2 2"></path><path d="M12 5V2l-2 2"></path><path d="M12 19v3l2-2"></path><path d="M5 12H2l2 2"></path><path d="M19 12h3l-2-2"></path><path d="M10 14v-4l-2 2 2 2z"></path><path d="M14 10v4l2-2-2-2z"></path></svg>`);
                     translateButtonSpan.textContent = originalButtonText;
-                    translateButton.querySelector('.spinner').remove();
-                    translateButton.querySelector('svg').style.display = 'block';
                     translateButton.disabled = false;
                 }
             });
@@ -449,7 +426,6 @@
             transcriptDiv.addEventListener('input', (e) => handleInput(e, transcriptImagePreview, 'original'));
             translatedTextDiv.addEventListener('input', (e) => handleInput(e, translatedImagePreview, 'translated'));
 
-            // Helper Functions
             function handleSpeech(text, langCode, button) {
                 if (synth.speaking) {
                     synth.cancel();
@@ -473,7 +449,7 @@
                 };
                 utterance.onerror = (e) => {
                     console.error('Speech synthesis error:', e);
-                    utterance.onend(); // Reset button on error
+                    utterance.onend();
                 };
                 synth.speak(utterance);
             }
@@ -513,7 +489,7 @@
                 const matches = text.match(imageUrlRegex) || [];
                 if (type === 'original') {
                     originalImageUrls = matches;
-                    final_transcript = text; // Keep final_transcript in sync with edits
+                    final_transcript = text;
                 }
                 else translatedImageUrls = matches;
                 updateImagePreview(previewElement, matches);
