@@ -237,7 +237,7 @@
             const synth = window.speechSynthesis;
             let recognition;
             let userStopped = false;
-            let final_transcript = '';
+            let committed_transcript = '';
             let currentlySpeakingButton = null;
             let originalImageUrls = [];
             let translatedImageUrls = [];
@@ -286,11 +286,21 @@
             };
 
             recognition.onend = () => {
+                // When a session ends, commit the full text from the display.
+                if (!userStopped) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = transcriptDiv.innerHTML;
+                    const interimSpan = tempDiv.querySelector('span');
+                    if (interimSpan) {
+                        interimSpan.remove();
+                    }
+                    committed_transcript = tempDiv.innerText.trim();
+                }
+
                 if (userStopped) {
                     statusDiv.textContent = uiStrings.statusStopped[uiLangSelector.value];
                     startButton.disabled = false;
                     stopButton.disabled = true;
-                    transcriptDiv.innerText = final_transcript.trim();
                     transcriptDiv.contentEditable = true;
                     transcriptDiv.classList.add('ring-2', 'ring-cyan-400', 'cursor-text');
                     transcriptDiv.focus();
@@ -311,21 +321,25 @@
 
             recognition.onresult = (event) => {
                 let interim_transcript = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                let session_transcript = '';
+
+                // Rebuild the transcript for the CURRENT SESSION from scratch
+                for (let i = 0; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
-                        final_transcript += event.results[i][0].transcript + ' ';
+                        session_transcript += event.results[i][0].transcript + ' ';
                     } else {
                         interim_transcript += event.results[i][0].transcript;
                     }
                 }
-                transcriptDiv.innerHTML = final_transcript + `<span class="text-gray-500">${interim_transcript}</span>`;
+                
+                // Display the combination of committed text from previous sessions and the current session's text
+                transcriptDiv.innerHTML = (committed_transcript ? committed_transcript + ' ' : '') + session_transcript + `<span class="text-gray-500">${interim_transcript}</span>`;
                 transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
             };
 
             startButton.addEventListener('click', () => {
                 synth.cancel();
                 resetAll();
-                final_transcript = '';
                 userStopped = false;
                 recognition.lang = speechLangCodes[sourceLangSelector.value];
                 recognition.start();
@@ -365,7 +379,7 @@
                     if (elementToDelete === transcriptDiv) {
                         transcriptImagePreview.innerHTML = '';
                         originalImageUrls = [];
-                        final_transcript = '';
+                        committed_transcript = '';
                     } else if (elementToDelete === translatedTextDiv) {
                         translatedImagePreview.innerHTML = '';
                         translatedImageUrls = [];
@@ -463,6 +477,7 @@
                 translatedImagePreview.innerHTML = '';
                 originalImageUrls = [];
                 translatedImageUrls = [];
+                committed_transcript = '';
                 transcriptDiv.contentEditable = false;
                 transcriptDiv.classList.remove('ring-2', 'ring-cyan-400', 'cursor-text');
                 translatedTextDiv.contentEditable = false;
@@ -489,7 +504,7 @@
                 const matches = text.match(imageUrlRegex) || [];
                 if (type === 'original') {
                     originalImageUrls = matches;
-                    final_transcript = text;
+                    committed_transcript = text;
                 }
                 else translatedImageUrls = matches;
                 updateImagePreview(previewElement, matches);
