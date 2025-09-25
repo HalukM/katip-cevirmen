@@ -276,7 +276,7 @@
             }
             
             recognition = new SpeechRecognition();
-            recognition.continuous = true;
+            recognition.continuous = false; // Set to false to handle results more granularly
             recognition.interimResults = true;
 
             recognition.onstart = () => {
@@ -286,17 +286,6 @@
             };
 
             recognition.onend = () => {
-                // When a session ends, commit the full text from the display.
-                if (!userStopped) {
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = transcriptDiv.innerHTML;
-                    const interimSpan = tempDiv.querySelector('span');
-                    if (interimSpan) {
-                        interimSpan.remove();
-                    }
-                    committed_transcript = tempDiv.innerText.trim();
-                }
-
                 if (userStopped) {
                     statusDiv.textContent = uiStrings.statusStopped[uiLangSelector.value];
                     startButton.disabled = false;
@@ -305,15 +294,22 @@
                     transcriptDiv.classList.add('ring-2', 'ring-cyan-400', 'cursor-text');
                     transcriptDiv.focus();
                 } else {
+                     // Automatically restart recognition if it stops prematurely
                     if (!startButton.disabled) return;
-                    try { recognition.start(); } catch(e) { console.error("Recognition restart error:", e); }
+                    try { 
+                        recognition.start(); 
+                    } catch(e) { 
+                        console.error("Recognition restart error:", e); 
+                        startButton.disabled = false;
+                        stopButton.disabled = true;
+                    }
                 }
             };
 
             recognition.onerror = (event) => {
                 if (event.error === 'no-speech' || event.error === 'audio-capture') {
                     console.warn('Speech recognition error ignored:', event.error);
-                    return;
+                    return; // Ignore common errors and let onend handle restart
                 }
                 statusDiv.textContent = 'Hata: ' + event.error;
                 console.error('Speech Recognition Error:', event.error);
@@ -321,19 +317,14 @@
 
             recognition.onresult = (event) => {
                 let interim_transcript = '';
-                let session_transcript = '';
-
-                // Rebuild the transcript for the CURRENT SESSION from scratch
-                for (let i = 0; i < event.results.length; ++i) {
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
-                        session_transcript += event.results[i][0].transcript + ' ';
+                        committed_transcript += event.results[i][0].transcript + ' ';
                     } else {
                         interim_transcript += event.results[i][0].transcript;
                     }
                 }
-                
-                // Display the combination of committed text from previous sessions and the current session's text
-                transcriptDiv.innerHTML = (committed_transcript ? committed_transcript + ' ' : '') + session_transcript + `<span class="text-gray-500">${interim_transcript}</span>`;
+                transcriptDiv.innerHTML = committed_transcript + `<span class="text-gray-500">${interim_transcript}</span>`;
                 transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
             };
 
