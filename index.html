@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katip - Gerçek Zamanlı Metin Dökümü ve Çeviri</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://css.gg/css?=|spinner" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Kaydırma çubuğu stilleri */
+        #transcript::-webkit-scrollbar, #translatedText::-webkit-scrollbar {
+            width: 8px;
+        }
+        #transcript::-webkit-scrollbar-track, #translatedText::-webkit-scrollbar-track {
+            background: #2d3748; /* gray-800 */
+        }
+        #transcript::-webkit-scrollbar-thumb, #translatedText::-webkit-scrollbar-thumb {
+            background: #4a5568; /* gray-600 */
+            border-radius: 4px;
+        }
+        #transcript::-webkit-scrollbar-thumb:hover, #translatedText::-webkit-scrollbar-thumb:hover {
+            background: #718096; /* gray-500 */
+        }
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        /* Düzenlenebilir alan için odaklanma stili */
+        #transcript:focus, #translatedText:focus {
+            outline: none;
+        }
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .image-preview img {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 8px;
+            border: 2px solid #4a5568;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen py-8">
+
+    <div class="w-full max-w-3xl mx-auto p-4 sm:p-6 md:p-8">
+        <div class="text-center mb-6">
+            <h1 class="text-4xl sm:text-5xl font-bold text-cyan-400">Katip</h1>
+            <p class="text-lg text-gray-400 mt-2" data-lang-key="subtitle">Gerçek Zamanlı Metin Dökümü ve Çeviri</p>
+        </div>
+
+        <!-- Dil Ayarları -->
+        <div class="bg-gray-800 rounded-xl shadow-lg p-4 mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+                <label for="uiLangSelector" class="block text-sm font-medium text-gray-400 mb-1" data-lang-key="uiLanguage">Arayüz Dili</label>
+                <select id="uiLangSelector" class="w-full bg-gray-700 text-white rounded-md border-gray-600 focus:ring-cyan-500 focus:border-cyan-500"></select>
+            </div>
+            <div>
+                <label for="sourceLangSelector" class="block text-sm font-medium text-gray-400 mb-1" data-lang-key="speechLanguage">Konuşma Dili</label>
+                <select id="sourceLangSelector" class="w-full bg-gray-700 text-white rounded-md border-gray-600 focus:ring-cyan-500 focus:border-cyan-500"></select>
+            </div>
+            <div>
+                <label for="targetLangSelector" class="block text-sm font-medium text-gray-400 mb-1" data-lang-key="targetLanguage">Hedef Dil</label>
+                <select id="targetLangSelector" class="w-full bg-gray-700 text-white rounded-md border-gray-600 focus:ring-cyan-500 focus:border-cyan-500"></select>
+            </div>
+        </div>
+
+        <!-- Kontrol Paneli -->
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div id="status" class="text-gray-300 text-center sm:text-left flex items-center gap-2">
+                <span id="status-text" data-lang-key="statusInitial">Başlamak için 'Dinlemeyi Başlat' düğmesine tıklayın.</span>
+            </div>
+            <div class="flex items-center gap-3 flex-wrap justify-center">
+                <button id="startButton" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line></svg>
+                    <span data-lang-key="startButton">Başlat</span>
+                </button>
+                <button id="stopButton" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200" disabled>
+                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                    <span data-lang-key="stopButton">Durdur</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Metin Dökümü Alanı -->
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                 <h2 class="text-xl font-semibold text-gray-300" data-lang-key="originalText">Orijinal Metin</h2>
+                 <div class="flex items-center gap-2">
+                    <button id="copyButton" title="Metni Kopyala" class="bg-gray-600 hover:bg-gray-700 text-white font-bold p-2 rounded-lg" data-lang-title-key="copyTooltip">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </button>
+                    <button id="shareButton" title="Metni Paylaş" class="bg-green-500 hover:bg-green-600 text-white font-bold p-2 rounded-lg" data-lang-title-key="shareTooltip">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                    </button>
+                    <button id="speakButton" title="Metni Seslendir" class="bg-purple-500 hover:bg-purple-600 text-white font-bold p-2 rounded-lg" data-lang-title-key="speakTooltip">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                    </button>
+                    <button id="deleteButton" title="Metni Sil" class="bg-red-500 hover:bg-red-600 text-white font-bold p-2 rounded-lg" data-lang-title-key="deleteTooltip">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                    </button>
+                 </div>
+            </div>
+            <div id="transcript" contenteditable="false" class="w-full h-60 overflow-y-auto text-gray-300 leading-relaxed bg-gray-900/50 p-4 rounded-md transition-all duration-300"></div>
+            <div id="transcript-image-preview" class="mt-4 image-preview"></div>
+        </div>
+        
+        <!-- Çeviri Butonu -->
+        <div class="text-center mb-6">
+            <button id="translateButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg flex items-center gap-2 transition-colors duration-200 mx-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22l-2-2 2-2"></path><path d="M20 12l2-2-2-2"></path><path d="M2 12l2 2-2 2"></path><path d="M12 2l2 2-2 2"></path><path d="M12 5V2l-2 2"></path><path d="M12 19v3l2-2"></path><path d="M5 12H2l2 2"></path><path d="M19 12h3l-2-2"></path><path d="M10 14v-4l-2 2 2 2z"></path><path d="M14 10v4l2-2-2-2z"></path></svg>
+                <span data-lang-key="translateButton">Çevir</span>
+            </button>
+        </div>
+
+        <!-- Çeviri Sonuç Alanı (Başlangıçta gizli) -->
+        <div id="translation-container" class="bg-gray-800 rounded-xl shadow-lg p-6 hidden">
+             <div class="flex justify-between items-center mb-4">
+                 <h2 class="text-xl font-semibold text-gray-300" data-lang-key="translatedText">Çevrilen Metin</h2>
+                 <div class="flex items-center gap-2">
+                    <button id="copyTranslatedButton" title="Çeviriyi Kopyala" class="bg-gray-600 hover:bg-gray-700 text-white font-bold p-2 rounded-lg" data-lang-title-key="copyTooltip">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </button>
+                    <button id="shareTranslatedButton" title="Çeviriyi Paylaş" class="bg-green-500 hover:bg-green-600 text-white font-bold p-2 rounded-lg" data-lang-title-key="shareTooltip">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                    </button>
+                    <button id="speakTranslatedButton" title="Çeviriyi Seslendir" class="bg-purple-500 hover:bg-purple-600 text-white font-bold p-2 rounded-lg" data-lang-title-key="speakTooltip">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                    </button>
+                    <button id="deleteTranslatedButton" title="Çeviriyi Sil" class="bg-red-500 hover:bg-red-600 text-white font-bold p-2 rounded-lg" data-lang-title-key="deleteTooltip">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                    </button>
+                 </div>
+            </div>
+            <div id="translatedText" contenteditable="false" class="w-full h-60 overflow-y-auto text-gray-300 leading-relaxed bg-gray-900/50 p-4 rounded-md transition-all duration-300"></div>
+            <div id="translated-image-preview" class="mt-4 image-preview"></div>
+        </div>
+    </div>
+
+    <!-- Onay Modalı (Başlangıçta gizli) -->
+    <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-70 items-center justify-center hidden z-50">
+        <div class="bg-gray-800 rounded-lg p-8 shadow-xl max-w-sm mx-auto">
+            <p id="modalText" class="text-lg mb-6 text-center"></p>
+            <div class="flex justify-center gap-4">
+                <button id="cancelDelete" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg" data-lang-key="cancelButton">İptal</button>
+                <button id="confirmDelete" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg" data-lang-key="deleteButton">Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Dil Verileri
+            const languages = {
+                'tr': 'Türkçe', 'en': 'English', 'fr': 'Français',
+                'de': 'Deutsch', 'es': 'Español', 'pt': 'Português'
+            };
+            const speechLangCodes = {
+                'tr': 'tr-TR', 'en': 'en-US', 'fr': 'fr-FR',
+                'de': 'de-DE', 'es': 'es-ES', 'pt': 'pt-BR'
+            };
+            const uiStrings = {
+                subtitle: { tr: 'Gerçek Zamanlı Metin Dökümü ve Çeviri', en: 'Real-time Transcription and Translation', fr: 'Transcription et Traduction en Temps Réel', de: 'Echtzeit-Transkription und Übersetzung', es: 'Transcripción y Traducción en Tiempo Real', pt: 'Transcrição e Tradução em Tempo Real' },
+                uiLanguage: { tr: 'Arayüz Dili', en: 'UI Language', fr: 'Langue de l\'interface', de: 'UI-Sprache', es: 'Idioma de la Interfaz', pt: 'Idioma da Interface' },
+                speechLanguage: { tr: 'Konuşma Dili', en: 'Speech Language', fr: 'Langue Parlée', de: 'Gesprochene Sprache', es: 'Idioma Hablado', pt: 'Idioma da Fala' },
+                targetLanguage: { tr: 'Hedef Dil', en: 'Target Language', fr: 'Langue Cible', de: 'Zielsprache', es: 'Idioma de Destino', pt: 'Idioma Alvo' },
+                statusInitial: { tr: "Başlamak için 'Başlat' düğmesine tıklayın.", en: "Click the 'Start' button to begin.", fr: "Cliquez sur 'Démarrer' pour commencer.", de: "Klicken Sie auf 'Start', um zu beginnen.", es: "Haga clic en 'Iniciar' para comenzar.", pt: "Clique em 'Iniciar' para começar." },
+                statusListening: { tr: 'Dinleniyor...', en: 'Listening...', fr: 'Écoute...', de: 'Hören...', es: 'Escuchando...', pt: 'Ouvindo...' },
+                statusStopped: { tr: 'Metni düzenleyebilir veya çevirebilirsiniz.', en: 'You can edit the text or translate.', fr: 'Vous pouvez éditer le texte ou traduire.', de: 'Sie können den Text bearbeiten oder übersetzen.', es: 'Puedes editar el texto o traducir.', pt: 'Você pode editar o texto ou traduzir.' },
+                startButton: { tr: 'Başlat', en: 'Start', fr: 'Démarrer', de: 'Start', es: 'Iniciar', pt: 'Iniciar' },
+                stopButton: { tr: 'Durdur', en: 'Stop', fr: 'Arrêter', de: 'Stopp', es: 'Detener', pt: 'Parar' },
+                originalText: { tr: 'Orijinal Metin', en: 'Original Text', fr: 'Texte Original', de: 'Originaltext', es: 'Texto Original', pt: 'Texto Original' },
+                copyTooltip: { tr: 'Metni Kopyala', en: 'Copy Text', fr: 'Copier le texte', de: 'Text kopieren', es: 'Copiar Texto', pt: 'Copiar Texto' },
+                shareTooltip: { tr: 'Metni Paylaş', en: 'Share Text', fr: 'Partager le texte', de: 'Text teilen', es: 'Compartir Texto', pt: 'Compartilhar Texto' },
+                deleteTooltip: { tr: 'Metni Sil', en: 'Delete Text', fr: 'Supprimer le texte', de: 'Text löschen', es: 'Eliminar Texto', pt: 'Excluir Texto' },
+                speakTooltip: { tr: 'Metni Seslendir', en: 'Speak Text', fr: 'Lire le texte', de: 'Text vorlesen', es: 'Leer Texto', pt: 'Falar Texto' },
+                translateButton: { tr: 'Çevir', en: 'Translate', fr: 'Traduire', de: 'Übersetzen', es: 'Traducir', pt: 'Traduzir' },
+                translating: { tr: 'Çevriliyor...', en: 'Translating...', fr: 'Traduction...', de: 'Übersetzen...', es: 'Traduciendo...', pt: 'Traduzindo...' },
+                translatedText: { tr: 'Çevrilen Metin', en: 'Translated Text', fr: 'Texte Traduit', de: 'Übersetzter Text', es: 'Texto Traducido', pt: 'Texto Traduzido' },
+                cancelButton: { tr: 'İptal', en: 'Cancel', fr: 'Annuler', de: 'Abbrechen', es: 'Cancelar', pt: 'Cancelar' },
+                deleteButton: { tr: 'Sil', en: 'Delete', fr: 'Supprimer', de: 'Löschen', es: 'Eliminar', pt: 'Excluir' },
+                confirmDeleteMessage: { tr: '{name} metni kalıcı olarak silmek istediğinizden emin misiniz?', en: 'Are you sure you want to permanently delete the {name} text?', fr: 'Voulez-vous vraiment supprimer définitivement le texte {name} ?', de: 'Möchten Sie den {name}-Text wirklich endgültig löschen?', es: '¿Está seguro de que desea eliminar permanentemente el texto {name}?', pt: 'Tem certeza de que deseja excluir permanentemente o texto {name}?' },
+                original: { tr: 'Orijinal', en: 'Original', fr: 'Original', de: 'Original', es: 'Original', pt: 'Original' },
+                translated: { tr: 'Çevrilen', en: 'Translated', fr: 'Traduit', de: 'Übersetzter', es: 'Traducido', pt: 'Traduzido' },
+                errorNoTextToTranslate: {tr: "Çevirmek için önce metin oluşturun.", en: "First, create some text to translate.", fr: "Veuillez d'abord créer du texte à traduire.", de: "Erstellen Sie zuerst Text zum Übersetzen.", es: "Primero, cree texto para traducir.", pt: "Primeiro, crie um texto para traduzir."},
+                errorTranslation: {tr: "Çeviri sırasında bir hata oluştu.", en: "An error occurred during translation.", fr: "Une erreur s'est produite lors de la traduction.", de: "Während der Übersetzung ist ein Fehler aufgetreten.", es: "Ocurrió un error durante la traducción.", pt: "Ocorreu um erro durante a tradução."},
+                errorNoTextToShare: {tr: "Paylaşmak için önce metin oluşturun.", en: "First, create some text to share.", fr: "Veuillez d'abord créer du texte à partager.", de: "Erstellen Sie zuerst Text zum Teilen.", es: "Primero, cree texto para compartir.", pt: "Primeiro, crie um texto para compartilhar."},
+                errorNoTextToSpeak: {tr: "Seslendirmek için metin gerekli.", en: "Text is required to speak.", fr: "Le texte est requis pour parler.", de: "Zum Sprechen ist Text erforderlich.", es: "Se requiere texto para hablar.", pt: "É necessário texto para falar."},
+                copiedTooltip: { tr: "Kopyalandı!", en: "Copied!", fr: "Copié !", de: "Kopiert!", es: "¡Copiado!", pt: "Copiado!" }
+            };
+            
+            // SVG İkonları
+            const speakIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
+            const stopIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>`;
+
+            // DOM elementleri
+            const uiLangSelector = document.getElementById('uiLangSelector');
+            const sourceLangSelector = document.getElementById('sourceLangSelector');
+            const targetLangSelector = document.getElementById('targetLangSelector');
+            const startButton = document.getElementById('startButton');
+            const stopButton = document.getElementById('stopButton');
+            const copyButton = document.getElementById('copyButton');
+            const shareButton = document.getElementById('shareButton');
+            const deleteButton = document.getElementById('deleteButton');
+            const speakButton = document.getElementById('speakButton');
+            const translateButton = document.getElementById('translateButton');
+            const copyTranslatedButton = document.getElementById('copyTranslatedButton');
+            const shareTranslatedButton = document.getElementById('shareTranslatedButton');
+            const deleteTranslatedButton = document.getElementById('deleteTranslatedButton');
+            const speakTranslatedButton = document.getElementById('speakTranslatedButton');
+            const statusDiv = document.getElementById('status-text');
+            const transcriptDiv = document.getElementById('transcript');
+            const translationContainer = document.getElementById('translation-container');
+            const translatedTextDiv = document.getElementById('translatedText');
+            const transcriptImagePreview = document.getElementById('transcript-image-preview');
+            const translatedImagePreview = document.getElementById('translated-image-preview');
+
+            const confirmationModal = document.getElementById('confirmationModal');
+            const modalText = document.getElementById('modalText');
+            const confirmDeleteButton = document.getElementById('confirmDelete');
+            const cancelDeleteButton = document.getElementById('cancelDelete');
+            let elementToDelete = null;
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const synth = window.speechSynthesis;
+            let recognition;
+            let userStopped = false;
+            let currentlySpeakingButton = null;
+            let originalImageUrls = [];
+            let translatedImageUrls = [];
+            const imageUrlRegex = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp|bmp))/gi;
+
+            function updateUILanguage(lang) {
+                document.documentElement.lang = lang;
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (uiStrings[key] && uiStrings[key][lang]) {
+                        el.textContent = uiStrings[key][lang];
+                    }
+                });
+                 document.querySelectorAll('[data-lang-title-key]').forEach(el => {
+                    const key = el.dataset.langTitleKey;
+                    if (uiStrings[key] && uiStrings[key][lang]) {
+                        el.title = uiStrings[key][lang];
+                    }
+                });
+            }
+
+            function populateLanguageSelectors() {
+                for (const [code, name] of Object.entries(languages)) {
+                    uiLangSelector.add(new Option(name, code));
+                    sourceLangSelector.add(new Option(name, code));
+                    targetLangSelector.add(new Option(name, code));
+                }
+                uiLangSelector.value = 'tr';
+                sourceLangSelector.value = 'tr';
+                targetLangSelector.value = 'en';
+            }
+
+            populateLanguageSelectors();
+            updateUILanguage('tr');
+            uiLangSelector.addEventListener('change', (e) => updateUILanguage(e.target.value));
+
+            if (!SpeechRecognition) {
+                statusDiv.textContent = 'Tarayıcınız konuşma tanımayı desteklemiyor.';
+                return;
+            }
+            
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            recognition.onstart = () => {
+                statusDiv.textContent = uiStrings.statusListening[uiLangSelector.value];
+                startButton.disabled = true;
+                stopButton.disabled = false;
+            };
+
+            recognition.onend = () => {
+                if (userStopped) {
+                    statusDiv.textContent = uiStrings.statusStopped[uiLangSelector.value];
+                    startButton.disabled = false;
+                    stopButton.disabled = true;
+                    transcriptDiv.contentEditable = true;
+                    transcriptDiv.classList.add('ring-2', 'ring-cyan-400', 'cursor-text');
+                    transcriptDiv.focus();
+                } else {
+                    if (!startButton.disabled) return;
+                    try { recognition.start(); } catch(e) { console.error("Recognition restart error:", e); }
+                }
+            };
+
+            recognition.onerror = (event) => {
+                statusDiv.textContent = 'Hata: ' + event.error;
+                console.error('Speech Recognition Error:', event.error);
+            };
+
+            recognition.onresult = (event) => {
+                let fullTranscript = '';
+                for (let i = 0; i < event.results.length; i++) {
+                    fullTranscript += event.results[i][0].transcript;
+                }
+                transcriptDiv.innerHTML = fullTranscript;
+                transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
+            };
+
+            startButton.addEventListener('click', () => {
+                synth.cancel();
+                resetAll();
+                userStopped = false;
+                recognition.lang = speechLangCodes[sourceLangSelector.value];
+                recognition.start();
+            });
+
+            stopButton.addEventListener('click', () => {
+                userStopped = true;
+                recognition.stop();
+            });
+
+            // Event Listeners for buttons and inputs
+            copyButton.addEventListener('click', () => copyText(transcriptDiv.innerText, copyButton));
+            shareButton.addEventListener('click', () => {
+                const textToShare = (transcriptDiv.innerText.replace(imageUrlRegex, '').replace(/\s+/g, ' ').trim() + ' ' + originalImageUrls.join(' ')).trim();
+                shareText(textToShare);
+            });
+            speakButton.addEventListener('click', () => {
+                const textToSpeak = transcriptDiv.innerText.replace(imageUrlRegex, '').trim();
+                handleSpeech(textToSpeak, speechLangCodes[sourceLangSelector.value], speakButton);
+            });
+
+            copyTranslatedButton.addEventListener('click', () => copyText(translatedTextDiv.innerText, copyTranslatedButton));
+            shareTranslatedButton.addEventListener('click', () => {
+                const textToShare = (translatedTextDiv.innerText.replace(imageUrlRegex, '').replace(/\s+/g, ' ').trim() + ' ' + translatedImageUrls.join(' ')).trim();
+                shareText(textToShare);
+            });
+            speakTranslatedButton.addEventListener('click', () => {
+                const textToSpeak = translatedTextDiv.innerText.replace(imageUrlRegex, '').trim();
+                handleSpeech(textToSpeak, speechLangCodes[targetLangSelector.value], speakTranslatedButton);
+            });
+
+            deleteButton.addEventListener('click', () => showDeleteConfirmation(transcriptDiv, uiStrings.original[uiLangSelector.value]));
+            deleteTranslatedButton.addEventListener('click', () => showDeleteConfirmation(translatedTextDiv, uiStrings.translated[uiLangSelector.value]));
+            
+            confirmDeleteButton.addEventListener('click', () => {
+                if (elementToDelete) {
+                    elementToDelete.innerHTML = '';
+                    if (elementToDelete === transcriptDiv) {
+                        transcriptImagePreview.innerHTML = '';
+                        originalImageUrls = [];
+                    } else if (elementToDelete === translatedTextDiv) {
+                        translatedImagePreview.innerHTML = '';
+                        translatedImageUrls = [];
+                    }
+                }
+                closeModal();
+            });
+            cancelDeleteButton.addEventListener('click', closeModal);
+
+            translateButton.addEventListener('click', async () => {
+                const lang = uiLangSelector.value;
+                const textToTranslate = transcriptDiv.innerText.replace(imageUrlRegex, '').trim();
+                if (!textToTranslate && originalImageUrls.length === 0) {
+                    showTemporaryStatus(uiStrings.errorNoTextToTranslate[lang]);
+                    return;
+                }
+
+                const translateButtonSpan = translateButton.querySelector('span');
+                const originalButtonText = translateButtonSpan.textContent;
+                translateButtonSpan.textContent = uiStrings.translating[lang];
+                translateButton.disabled = true;
+
+                try {
+                    let translated = '';
+                    if (textToTranslate) {
+                        const sourceLang = sourceLangSelector.value;
+                        const targetLang = targetLangSelector.value;
+                        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(textToTranslate)}`;
+                        const response = await fetch(url);
+                        const data = await response.json();
+                        if (data && data[0]) data[0].forEach(segment => { if (segment[0]) translated += segment[0]; });
+                    }
+                    
+                    const urlsToAppend = originalImageUrls.join(' ');
+                    translatedTextDiv.innerText = (translated + ' ' + urlsToAppend).trim();
+                    
+                    translationContainer.classList.remove('hidden');
+                    translatedTextDiv.contentEditable = true;
+                    translatedTextDiv.classList.add('ring-2', 'ring-cyan-400', 'cursor-text');
+                    
+                    translatedImageUrls = [...originalImageUrls];
+                    updateImagePreview(translatedImagePreview, translatedImageUrls);
+
+                } catch (error) {
+                    console.error('Translation Error:', error);
+                    showTemporaryStatus(uiStrings.errorTranslation[lang]);
+                } finally {
+                    translateButtonSpan.textContent = originalButtonText;
+                    translateButton.disabled = false;
+                }
+            });
+
+            transcriptDiv.addEventListener('input', (e) => handleInput(e, transcriptImagePreview, 'original'));
+            translatedTextDiv.addEventListener('input', (e) => handleInput(e, translatedImagePreview, 'translated'));
+
+            // Helper Functions
+            function handleSpeech(text, langCode, button) {
+                if (synth.speaking) {
+                    synth.cancel();
+                    if (currentlySpeakingButton === button) return;
+                }
+                if (!text.trim()) {
+                    showTemporaryStatus(uiStrings.errorNoTextToSpeak[uiLangSelector.value]);
+                    return;
+                }
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = langCode;
+                utterance.onstart = () => {
+                    currentlySpeakingButton = button;
+                    button.innerHTML = stopIconSVG;
+                    button.title = uiStrings.stopButton[uiLangSelector.value];
+                };
+                utterance.onend = () => {
+                    button.innerHTML = speakIconSVG;
+                    button.title = uiStrings.speakTooltip[uiLangSelector.value];
+                    currentlySpeakingButton = null;
+                };
+                utterance.onerror = (e) => {
+                    console.error('Speech synthesis error:', e);
+                    utterance.onend(); // Reset button on error
+                };
+                synth.speak(utterance);
+            }
+
+            function resetAll() {
+                synth.cancel();
+                transcriptDiv.innerHTML = '';
+                translatedTextDiv.innerHTML = '';
+                translationContainer.classList.add('hidden');
+                transcriptImagePreview.innerHTML = '';
+                translatedImagePreview.innerHTML = '';
+                originalImageUrls = [];
+                translatedImageUrls = [];
+                transcriptDiv.contentEditable = false;
+                transcriptDiv.classList.remove('ring-2', 'ring-cyan-400', 'cursor-text');
+                translatedTextDiv.contentEditable = false;
+                translatedTextDiv.classList.remove('ring-2', 'ring-cyan-400', 'cursor-text');
+            }
+
+            function showDeleteConfirmation(element, name) {
+                if (!element.innerText.trim()) return;
+                const lang = uiLangSelector.value;
+                modalText.textContent = uiStrings.confirmDeleteMessage[lang].replace('{name}', name);
+                elementToDelete = element;
+                confirmationModal.classList.remove('hidden');
+                confirmationModal.classList.add('flex');
+            }
+
+            function closeModal() {
+                confirmationModal.classList.add('hidden');
+                confirmationModal.classList.remove('flex');
+                elementToDelete = null;
+            }
+            
+            function handleInput(event, previewElement, type) {
+                const text = event.target.innerText;
+                const matches = text.match(imageUrlRegex) || [];
+                if (type === 'original') originalImageUrls = matches;
+                else translatedImageUrls = matches;
+                updateImagePreview(previewElement, matches);
+            }
+        
+            function updateImagePreview(previewElement, urls) {
+                previewElement.innerHTML = '';
+                if (urls && urls.length > 0) {
+                    [...new Set(urls)].forEach(url => {
+                        const img = document.createElement('img');
+                        img.src = url;
+                        img.alt = 'Görsel Önizlemesi';
+                        img.onerror = () => { img.style.display = 'none'; };
+                        previewElement.appendChild(img);
+                    });
+                }
+            }
+            
+            function copyText(text, buttonElement) {
+                if (text) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        const originalTitle = buttonElement.title;
+                        buttonElement.title = uiStrings.copiedTooltip[uiLangSelector.value];
+                        setTimeout(() => { buttonElement.title = originalTitle; }, 2000);
+                    }).catch(err => console.error('Copy failed: ', err));
+                }
+            }
+
+            async function shareText(text) {
+                if (!text.trim()) {
+                    showTemporaryStatus(uiStrings.errorNoTextToShare[uiLangSelector.value]);
+                    return;
+                }
+                if (navigator.share) {
+                    try { await navigator.share({ title: 'Katip Text', text }); } 
+                    catch (err) { console.error('Share error:', err); }
+                } else {
+                    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                }
+            }
+            
+            function showTemporaryStatus(message) {
+                const originalStatus = statusDiv.textContent;
+                statusDiv.textContent = message;
+                setTimeout(() => { statusDiv.textContent = originalStatus; }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
+
