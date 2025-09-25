@@ -104,9 +104,6 @@
                     <button id="shareButton" title="Metni Paylaş" class="bg-green-500 hover:bg-green-600 text-white font-bold p-2 rounded-lg" data-lang-title-key="shareTooltip">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
                     </button>
-                    <button id="punctuateButton" title="Metni Düzelt (AI)" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold p-2 rounded-lg" data-lang-title-key="punctuateTooltip">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2.35M10.15 6.35L12 8.2l1.85-1.85M12 13.79V21M3 12h2.35M6.35 10.15L8.2 12l-1.85 1.85M13.79 12H21"/></svg>
-                    </button>
                     <button id="speakButton" title="Metni Seslendir" class="bg-purple-500 hover:bg-purple-600 text-white font-bold p-2 rounded-lg" data-lang-title-key="speakTooltip">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
                     </button>
@@ -188,10 +185,8 @@
                 shareTooltip: { tr: 'Metni Paylaş', en: 'Share Text', fr: 'Partager le texte', de: 'Text teilen', es: 'Compartir Texto', pt: 'Compartilhar Texto' },
                 deleteTooltip: { tr: 'Metni Sil', en: 'Delete Text', fr: 'Supprimer le texte', de: 'Text löschen', es: 'Eliminar Texto', pt: 'Excluir Texto' },
                 speakTooltip: { tr: 'Metni Seslendir', en: 'Speak Text', fr: 'Lire le texte', de: 'Text vorlesen', es: 'Leer Texto', pt: 'Falar Texto' },
-                punctuateTooltip: { tr: 'Metni Düzelt (AI)', en: 'Correct Text (AI)', fr: 'Corriger le Texte (IA)', de: 'Text korrigieren (KI)', es: 'Corregir Texto (IA)', pt: 'Corrigir Texto (IA)' },
                 translateButton: { tr: 'Çevir', en: 'Translate', fr: 'Traduire', de: 'Übersetzen', es: 'Traducir', pt: 'Traduzir' },
                 translating: { tr: 'Çevriliyor...', en: 'Translating...', fr: 'Traduction...', de: 'Übersetzen...', es: 'Traduciendo...', pt: 'Traduzindo...' },
-                punctuating: { tr: 'İşleniyor...', en: 'Processing...', fr: 'En traitement...', de: 'Wird bearbeitet...', es: 'Procesando...', pt: 'Processando...' },
                 translatedText: { tr: 'Çevrilen Metin', en: 'Translated Text', fr: 'Texte Traduit', de: 'Übersetzter Text', es: 'Texto Traducido', pt: 'Texto Traduzido' },
                 cancelButton: { tr: 'İptal', en: 'Cancel', fr: 'Annuler', de: 'Abbrechen', es: 'Cancelar', pt: 'Cancelar' },
                 deleteButton: { tr: 'Sil', en: 'Delete', fr: 'Supprimer', de: 'Löschen', es: 'Eliminar', pt: 'Excluir' },
@@ -200,10 +195,8 @@
                 translated: { tr: 'Çevrilen', en: 'Translated', fr: 'Traduit', de: 'Übersetzter', es: 'Traducido', pt: 'Traduzido' },
                 errorNoTextToTranslate: {tr: "Çevirmek için önce metin oluşturun.", en: "First, create some text to translate.", fr: "Veuillez d'abord créer du texte à traduire.", de: "Erstellen Sie zuerst Text zum Übersetzen.", es: "Primero, cree texto para traducir.", pt: "Primeiro, crie um texto para traduzir."},
                 errorTranslation: {tr: "Çeviri sırasında bir hata oluştu.", en: "An error occurred during translation.", fr: "Une erreur s'est produite lors de la traduction.", de: "Während der Übersetzung ist ein Fehler aufgetreten.", es: "Ocurrió un error durante la traducción.", pt: "Ocorreu um erro durante a tradução."},
-                errorPunctuation: {tr: "Metin düzeltilirken bir hata oluştu.", en: "An error occurred while correcting the text.", fr: "Une erreur s'est produite lors de la correction du texte.", de: "Beim Korrigieren des Textes ist ein Fehler aufgetreten.", es: "Ocurrió un error al corregir el texto.", pt: "Ocorreu um erro ao corrigir o texto."},
                 errorNoTextToShare: {tr: "Paylaşmak için önce metin oluşturun.", en: "First, create some text to share.", fr: "Veuillez d'abord créer du texte à partager.", de: "Erstellen Sie zuerst Text zum Teilen.", es: "Primero, cree texto para compartir.", pt: "Primeiro, crie um texto para compartilhar."},
                 errorNoTextToSpeak: {tr: "Seslendirmek için metin gerekli.", en: "Text is required to speak.", fr: "Le texte est requis pour parler.", de: "Zum Sprechen ist Text erforderlich.", es: "Se requiere texto para hablar.", pt: "É necessário texto para falar."},
-                errorNoTextToPunctuate: {tr: "İşlemek için metin gerekli.", en: "Text is required to process.", fr: "Le texte est requis pour le traitement.", de: "Zur Verarbeitung ist Text erforderlich.", es: "Se requiere texto para procesar.", pt: "É necessário texto para processar."},
                 copiedTooltip: { tr: "Kopyalandı!", en: "Copied!", fr: "Copié !", de: "Kopiert!", es: "¡Copiado!", pt: "Copiado!" }
             };
             
@@ -222,7 +215,6 @@
             const shareButton = document.getElementById('shareButton');
             const deleteButton = document.getElementById('deleteButton');
             const speakButton = document.getElementById('speakButton');
-            const punctuateButton = document.getElementById('punctuateButton');
             const translateButton = document.getElementById('translateButton');
             const copyTranslatedButton = document.getElementById('copyTranslatedButton');
             const shareTranslatedButton = document.getElementById('shareTranslatedButton');
@@ -298,6 +290,7 @@
                     statusDiv.textContent = uiStrings.statusStopped[uiLangSelector.value];
                     startButton.disabled = false;
                     stopButton.disabled = true;
+                    transcriptDiv.innerText = final_transcript.trim(); // Clean up final text
                     transcriptDiv.contentEditable = true;
                     transcriptDiv.classList.add('ring-2', 'ring-cyan-400', 'cursor-text');
                     transcriptDiv.focus();
@@ -316,7 +309,7 @@
                 let interim_transcript = '';
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
-                        final_transcript += event.results[i][0].transcript;
+                        final_transcript += event.results[i][0].transcript + ' ';
                     } else {
                         interim_transcript += event.results[i][0].transcript;
                     }
@@ -339,62 +332,6 @@
                 recognition.stop();
             });
             
-            punctuateButton.addEventListener('click', async () => {
-                const lang = uiLangSelector.value;
-                const textToProcess = transcriptDiv.innerText;
-                if (!textToProcess.trim()) {
-                    showTemporaryStatus(uiStrings.errorNoTextToPunctuate[lang]);
-                    return;
-                }
-                
-                const originalIcon = punctuateButton.innerHTML;
-                punctuateButton.innerHTML = spinnerIconSVG;
-                punctuateButton.disabled = true;
-
-                try {
-                    const apiKey = "";
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-                    
-                    const sourceLangName = languages[sourceLangSelector.value];
-                    const prompt = `Correct the following text in ${sourceLangName} for grammar, spelling, and punctuation. Do not change the original meaning. Respond ONLY with the corrected text, without any introductory phrases or explanations. The text to correct is: "${textToProcess}"`;
-                    
-                    const payload = {
-                        contents: [{ parts: [{ text: prompt }] }]
-                    };
-
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) {
-                        const errorBody = await response.text();
-                        console.error('API Error Response:', errorBody);
-                        throw new Error(`API error: ${response.status} ${response.statusText}`);
-                    }
-
-                    const result = await response.json();
-                    const correctedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                    if (correctedText) {
-                        transcriptDiv.innerText = correctedText.trim();
-                        final_transcript = correctedText.trim(); // Update final transcript as well
-                        handleInput({ target: transcriptDiv }, transcriptImagePreview, 'original');
-                    } else {
-                        console.error("Invalid response structure from API:", result);
-                        throw new Error("Invalid response from API.");
-                    }
-                } catch (error) {
-                    console.error('Correction Error:', error);
-                    showTemporaryStatus(uiStrings.errorPunctuation[lang]); 
-                } finally {
-                    punctuateButton.innerHTML = originalIcon;
-                    punctuateButton.disabled = false;
-                }
-            });
-
-
             // Event Listeners for buttons and inputs
             copyButton.addEventListener('click', () => copyText(transcriptDiv.innerText, copyButton));
             shareButton.addEventListener('click', () => {
