@@ -301,6 +301,11 @@
             };
 
             recognition.onerror = (event) => {
+                // Silently ignore 'no-speech' and 'audio-capture' errors, as they are common and the onend event will handle restarting.
+                if (event.error === 'no-speech' || event.error === 'audio-capture') {
+                    console.warn('Speech recognition error ignored:', event.error);
+                    return;
+                }
                 statusDiv.textContent = 'Hata: ' + event.error;
                 console.error('Speech Recognition Error:', event.error);
             };
