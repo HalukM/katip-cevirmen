@@ -111,6 +111,9 @@
                     <button id="shareButton" title="Metni Paylaş" class="bg-green-500 hover:bg-green-600 text-white font-bold p-2 rounded-lg" data-lang-title-key="shareTooltip">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
                     </button>
+                    <button id="punctuateButton" title="Metni Düzelt (AI)" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold p-2 rounded-lg hidden" data-lang-title-key="punctuateTooltip">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2.35M10.15 6.35L12 8.2l1.85-1.85M12 13.79V21M3 12h2.35M6.35 10.15L8.2 12l-1.85 1.85M13.79 12H21"/></svg>
+                    </button>
                     <button id="speakButton" title="Metni Seslendir" class="bg-purple-500 hover:bg-purple-600 text-white font-bold p-2 rounded-lg" data-lang-title-key="speakTooltip">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
                     </button>
@@ -208,6 +211,10 @@
                 speakTooltip: { tr: 'Metni Seslendir', en: 'Speak Text', fr: 'Lire le texte', de: 'Text vorlesen', es: 'Leer Texto', pt: 'Falar Texto' },
                 saveTooltip: { tr: 'Kütüphaneye Kaydet', en: 'Save to Library', fr: 'Enregistrer dans la bibliothèque', de: 'In Bibliothek speichern', es: 'Guardar en la biblioteca', pt: 'Salvar na Biblioteca' },
                 loadTooltip: { tr: 'Yükle ve Düzenle', en: 'Load and Edit', fr: 'Charger et modifier', de: 'Laden und Bearbeiten', es: 'Cargar y Editar', pt: 'Carregar e Editar' },
+                punctuateTooltip: { tr: 'Metni Düzelt (AI)', en: 'Correct Text (AI)', fr: 'Corriger le Texte (IA)', de: 'Text korrigieren (KI)', es: 'Corregir Texto (IA)', pt: 'Corrigir Texto (IA)' },
+                punctuating: { tr: 'Düzeltiliyor...', en: 'Correcting...', fr: 'Correction...', de: 'Korrigiere...', es: 'Corrigiendo...', pt: 'Corrigindo...' },
+                errorPunctuation: { tr: 'Metin düzeltilirken bir hata oluştu.', en: 'An error occurred while correcting the text.', fr: 'Une erreur sest produite lors de la correction du texte.', de: 'Beim Korrigieren des Textes ist ein Fehler aufgetreten.', es: 'Ocurrió un error al corregir el texto.', pt: 'Ocorreu um erro ao corrigir o texto.' },
+                errorNoTextToPunctuate: { tr: 'Düzeltmek için metin gerekli.', en: 'Text is required to correct.', fr: 'Le texte est requis pour corriger.', de: 'Text ist zum Korrigieren erforderlich.', es: 'Se requiere texto para corregir.', pt: 'É necessário texto para corrigir.' },
                 translateButton: { tr: 'Çevir', en: 'Translate', fr: 'Traduire', de: 'Übersetzen', es: 'Traducir', pt: 'Traduzir' },
                 translating: { tr: 'Çevriliyor...', en: 'Translating...', fr: 'Traduction...', de: 'Übersetzen...', es: 'Traduciendo...', pt: 'Traduzindo...' },
                 translatedText: { tr: 'Çevrilen Metin', en: 'Translated Text', fr: 'Texte Traduit', de: 'Übersetzter Text', es: 'Texto Traducido', pt: 'Texto Traduzido' },
@@ -232,7 +239,9 @@
                 listenButtonText: { tr: 'Dinle', en: 'Listen', fr: 'Écouter', de: 'Hören', es: 'Escuchar', pt: 'Ouvir' },
                 listenTranslatedButtonText: { tr: 'Dinle (Çeviri)', en: 'Listen (Trans.)', fr: 'Écouter (Trad.)', de: 'Hören (Übers.)', es: 'Escuchar (Trad.)', pt: 'Ouvir (Trad.)' },
                 deleteButtonText: { tr: 'Sil', en: 'Delete', fr: 'Supprimer', de: 'Löschen', es: 'Eliminar', pt: 'Excluir' },
-                speakTranslatedTooltip: { tr: 'Çeviriyi Seslendir', en: 'Speak Translation', fr: 'Lire la traduction', de: 'Übersetzung vorlesen', es: 'Leer Traducción', pt: 'Falar Tradução' }
+                speakTranslatedTooltip: { tr: 'Çeviriyi Seslendir', en: 'Speak Translation', fr: 'Lire la traduction', de: 'Übersetzung vorlesen', es: 'Leer Traducción', pt: 'Falar Tradução' },
+                copyTranslatedTooltip: { tr: 'Çeviriyi Kopyala', en: 'Copy Translation', fr: 'Copier la traduction', de: 'Übersetzung kopieren', es: 'Copiar Traducción', pt: 'Copiar Tradução' },
+                copyButtonText: { tr: 'Kopyala', en: 'Copy', fr: 'Copier', de: 'Kopieren', es: 'Copiar', pt: 'Copiar' },
             };
             
             // SVG İkonları
@@ -251,6 +260,7 @@
             const shareButton = document.getElementById('shareButton');
             const deleteButton = document.getElementById('deleteButton');
             const speakButton = document.getElementById('speakButton');
+            const punctuateButton = document.getElementById('punctuateButton');
             const translateButton = document.getElementById('translateButton');
             const copyTranslatedButton = document.getElementById('copyTranslatedButton');
             const shareTranslatedButton = document.getElementById('shareTranslatedButton');
@@ -309,7 +319,12 @@
 
             populateLanguageSelectors();
             updateUILanguage('tr');
-            uiLangSelector.addEventListener('change', (e) => updateUILanguage(e.target.value));
+            uiLangSelector.addEventListener('change', (e) => {
+                updateUILanguage(e.target.value);
+                if (!libraryModal.classList.contains('hidden')) {
+                    renderLibrary();
+                }
+            });
 
             if (!SpeechRecognition) {
                 statusDiv.textContent = 'Tarayıcınız konuşma tanımayı desteklemiyor.';
@@ -332,6 +347,7 @@
                     startButton.disabled = false;
                     stopButton.disabled = true;
                     transcriptDiv.contentEditable = true;
+                    punctuateButton.classList.remove('hidden');
                     transcriptDiv.classList.add('ring-2', 'ring-cyan-400', 'cursor-text');
                     transcriptDiv.focus();
                 } else {
@@ -375,6 +391,54 @@
                 recognition.stop();
             });
             
+            punctuateButton.addEventListener('click', async () => {
+                const lang = uiLangSelector.value;
+                const textToProcess = transcriptDiv.innerText;
+                if (!textToProcess.trim()) {
+                    showTemporaryStatus(uiStrings.errorNoTextToPunctuate[lang]);
+                    return;
+                }
+                
+                const originalIcon = punctuateButton.innerHTML;
+                punctuateButton.innerHTML = spinnerIconSVG;
+                punctuateButton.disabled = true;
+
+                try {
+                    const apiKey = ""; 
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                    
+                    const sourceLangName = languages[sourceLangSelector.value];
+                    const prompt = `Correct the following text in ${sourceLangName} for grammar, spelling, and punctuation. Do not change the original meaning. Respond ONLY with the corrected text, without any introductory phrases or explanations. The text to correct is: "${textToProcess}"`;
+                    
+                    const payload = { contents: [{ parts: [{ text: prompt }] }] };
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+
+                    const result = await response.json();
+                    const correctedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                    if (correctedText) {
+                        transcriptDiv.innerText = correctedText.trim();
+                        committed_transcript = correctedText.trim();
+                        handleInput({ target: transcriptDiv }, transcriptImagePreview, 'original');
+                    } else {
+                        throw new Error("Invalid response from API.");
+                    }
+                } catch (error) {
+                    console.error('Correction Error:', error);
+                    showTemporaryStatus(uiStrings.errorPunctuation[lang]); 
+                } finally {
+                    punctuateButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2.35M10.15 6.35L12 8.2l1.85-1.85M12 13.79V21M3 12h2.35M6.35 10.15L8.2 12l-1.85 1.85M13.79 12H21"/></svg>`;
+                    punctuateButton.disabled = false;
+                }
+            });
+
             copyButton.addEventListener('click', () => copyText(transcriptDiv.innerText, copyButton));
             shareButton.addEventListener('click', () => {
                 const textToShare = (transcriptDiv.innerText.replace(imageUrlRegex, '').replace(/\s+/g, ' ').trim() + ' ' + originalImageUrls.join(' ')).trim();
@@ -431,15 +495,28 @@
                 translateButton.disabled = true;
 
                 try {
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
                     let translated = '';
                     if (textToTranslate) {
-                        const sourceLang = sourceLangSelector.value;
-                        const targetLang = targetLangSelector.value;
-                        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(textToTranslate)}`;
-                        const response = await fetch(url);
-                        if (!response.ok) throw new Error('Translation API request failed');
-                        const data = await response.json();
-                        if (data && data[0]) data[0].forEach(segment => { if (segment[0]) translated += segment[0]; });
+                        const sourceLangName = languages[sourceLangSelector.value];
+                        const targetLangName = languages[targetLangSelector.value];
+                        const prompt = `Translate the following text accurately from ${sourceLangName} to ${targetLangName}. Respond ONLY with the translated text, without any introductory phrases or explanations. The text to translate is: "${textToTranslate}"`;
+                        
+                        const payload = { contents: [{ parts: [{ text: prompt }] }] };
+
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+
+                        const result = await response.json();
+                        translated = result.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+                        if (!translated) throw new Error("Invalid response from API.");
                     }
                     
                     const urlsToAppend = originalImageUrls.join(' ');
@@ -493,7 +570,7 @@
                     targetLang: targetLangSelector.value,
                     timestamp: new Date().toISOString()
                 };
-                library.unshift(newDoc); // Add to the beginning
+                library.unshift(newDoc);
                 saveLibrary(library);
                 showTemporaryTooltip(saveButton, uiStrings.savedTooltip[uiLangSelector.value]);
             });
@@ -549,6 +626,10 @@
                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
                                <span>${uiStrings.listenTranslatedButtonText[currentLang]}</span>
                             </button>
+                            <button data-action="copy-translated" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-3 rounded-lg flex items-center gap-1 text-sm" title="${uiStrings.copyTranslatedTooltip[currentLang]}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                <span>${uiStrings.copyButtonText[currentLang]}</span>
+                            </button>
                             ` : ''}
                              <button data-action="delete" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded-lg flex items-center gap-1 text-sm" title="${uiStrings.deleteTooltip[currentLang]}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -567,6 +648,11 @@
                     const speakTranslatedBtn = docEl.querySelector('[data-action="speak-translated"]');
                     if(speakTranslatedBtn) {
                         speakTranslatedBtn.addEventListener('click', (e) => handleSpeech(doc.translatedText, speechLangCodes[doc.targetLang], e.currentTarget));
+                    }
+
+                    const copyTranslatedBtn = docEl.querySelector('[data-action="copy-translated"]');
+                    if(copyTranslatedBtn) {
+                        copyTranslatedBtn.addEventListener('click', (e) => copyText(doc.translatedText, e.currentTarget));
                     }
 
                     docEl.querySelector('[data-action="delete"]').addEventListener('click', () => {
@@ -615,7 +701,10 @@
             function handleSpeech(text, langCode, button) {
                 if (synth.speaking) {
                     synth.cancel();
-                    if (currentlySpeakingButton === button) return;
+                    if (currentlySpeakingButton === button) {
+                        currentlySpeakingButton = null;
+                        return;
+                    }
                 }
                 if (!text.trim()) {
                     showTemporaryStatus(uiStrings.errorNoTextToSpeak[uiLangSelector.value]);
@@ -624,6 +713,7 @@
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = langCode;
                 utterance.onstart = () => {
+                    if (currentlySpeakingButton) currentlySpeakingButton.innerHTML = speakIconSVG;
                     currentlySpeakingButton = button;
                     button.innerHTML = stopIconSVG;
                 };
@@ -649,6 +739,7 @@
                 translatedImageUrls = [];
                 committed_transcript = '';
                 transcriptDiv.contentEditable = false;
+                punctuateButton.classList.add('hidden');
                 transcriptDiv.classList.remove('ring-2', 'ring-cyan-400', 'cursor-text');
                 translatedTextDiv.contentEditable = false;
                 translatedTextDiv.classList.remove('ring-2', 'ring-cyan-400', 'cursor-text');
