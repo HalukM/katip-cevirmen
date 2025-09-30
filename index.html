@@ -14,17 +14,17 @@
             font-family: 'Inter', sans-serif;
         }
         /* Kaydırma çubuğu stilleri */
-        #transcript::-webkit-scrollbar, #translatedText::-webkit-scrollbar {
+        #transcript::-webkit-scrollbar, #translatedText::-webkit-scrollbar, #library-container::-webkit-scrollbar {
             width: 8px;
         }
-        #transcript::-webkit-scrollbar-track, #translatedText::-webkit-scrollbar-track {
-            background: #2d3748; /* gray-800 */
+        #transcript::-webkit-scrollbar-track, #translatedText::-webkit-scrollbar-track, #library-container::-webkit-scrollbar-track {
+            background: #1a202c; /* gray-900 */
         }
-        #transcript::-webkit-scrollbar-thumb, #translatedText::-webkit-scrollbar-thumb {
+        #transcript::-webkit-scrollbar-thumb, #translatedText::-webkit-scrollbar-thumb, #library-container::-webkit-scrollbar-thumb {
             background: #4a5568; /* gray-600 */
             border-radius: 4px;
         }
-        #transcript::-webkit-scrollbar-thumb:hover, #translatedText::-webkit-scrollbar-thumb:hover {
+        #transcript::-webkit-scrollbar-thumb:hover, #translatedText::-webkit-scrollbar-thumb:hover, #library-container::-webkit-scrollbar-thumb:hover {
             background: #718096; /* gray-500 */
         }
         .spinner {
@@ -55,9 +55,13 @@
 <body class="bg-gray-900 text-white flex items-center justify-center min-h-screen py-8">
 
     <div class="w-full max-w-3xl mx-auto p-4 sm:p-6 md:p-8">
-        <div class="text-center mb-6">
+        <div class="text-center mb-6 relative">
             <h1 class="text-4xl sm:text-5xl font-bold text-cyan-400">Katip</h1>
             <p class="text-lg text-gray-400 mt-2" data-lang-key="subtitle">Gerçek Zamanlı Metin Dökümü ve Çeviri</p>
+             <button id="libraryButton" class="absolute top-0 right-0 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                <span data-lang-key="libraryButton">Kütüphane</span>
+            </button>
         </div>
 
         <!-- Dil Ayarları -->
@@ -98,6 +102,9 @@
             <div class="flex justify-between items-center mb-4">
                  <h2 class="text-xl font-semibold text-gray-300" data-lang-key="originalText">Orijinal Metin</h2>
                  <div class="flex items-center gap-2">
+                    <button id="saveButton" title="Kütüphaneye Kaydet" class="bg-blue-500 hover:bg-blue-600 text-white font-bold p-2 rounded-lg" data-lang-title-key="saveTooltip">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    </button>
                     <button id="copyButton" title="Metni Kopyala" class="bg-gray-600 hover:bg-gray-700 text-white font-bold p-2 rounded-lg" data-lang-title-key="copyTooltip">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                     </button>
@@ -148,7 +155,7 @@
         </div>
     </div>
 
-    <!-- Onay Modalı (Başlangıçta gizli) -->
+    <!-- Onay Modalı -->
     <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-70 items-center justify-center hidden z-50">
         <div class="bg-gray-800 rounded-lg p-8 shadow-xl max-w-sm mx-auto">
             <p id="modalText" class="text-lg mb-6 text-center"></p>
@@ -158,6 +165,20 @@
             </div>
         </div>
     </div>
+
+    <!-- Kütüphane Modalı -->
+    <div id="libraryModal" class="fixed inset-0 bg-black bg-opacity-70 items-center justify-center hidden z-50">
+        <div class="bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl mx-auto flex flex-col" style="height: 80vh;">
+            <div class="p-4 border-b border-gray-700 flex justify-between items-center">
+                <h2 class="text-2xl font-semibold" data-lang-key="libraryTitle">Kütüphane</h2>
+                <button id="closeLibraryButton" class="text-gray-400 hover:text-white">&times;</button>
+            </div>
+            <div id="library-container" class="p-6 overflow-y-auto flex-grow">
+                <!-- Kütüphane içeriği buraya gelecek -->
+            </div>
+        </div>
+    </div>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -185,19 +206,27 @@
                 shareTooltip: { tr: 'Metni Paylaş', en: 'Share Text', fr: 'Partager le texte', de: 'Text teilen', es: 'Compartir Texto', pt: 'Compartilhar Texto' },
                 deleteTooltip: { tr: 'Metni Sil', en: 'Delete Text', fr: 'Supprimer le texte', de: 'Text löschen', es: 'Eliminar Texto', pt: 'Excluir Texto' },
                 speakTooltip: { tr: 'Metni Seslendir', en: 'Speak Text', fr: 'Lire le texte', de: 'Text vorlesen', es: 'Leer Texto', pt: 'Falar Texto' },
+                saveTooltip: { tr: 'Kütüphaneye Kaydet', en: 'Save to Library', fr: 'Enregistrer dans la bibliothèque', de: 'In Bibliothek speichern', es: 'Guardar en la biblioteca', pt: 'Salvar na Biblioteca' },
+                loadTooltip: { tr: 'Yükle ve Düzenle', en: 'Load and Edit', fr: 'Charger et modifier', de: 'Laden und Bearbeiten', es: 'Cargar y Editar', pt: 'Carregar e Editar' },
                 translateButton: { tr: 'Çevir', en: 'Translate', fr: 'Traduire', de: 'Übersetzen', es: 'Traducir', pt: 'Traduzir' },
                 translating: { tr: 'Çevriliyor...', en: 'Translating...', fr: 'Traduction...', de: 'Übersetzen...', es: 'Traduciendo...', pt: 'Traduzindo...' },
                 translatedText: { tr: 'Çevrilen Metin', en: 'Translated Text', fr: 'Texte Traduit', de: 'Übersetzter Text', es: 'Texto Traducido', pt: 'Texto Traduzido' },
                 cancelButton: { tr: 'İptal', en: 'Cancel', fr: 'Annuler', de: 'Abbrechen', es: 'Cancelar', pt: 'Cancelar' },
                 deleteButton: { tr: 'Sil', en: 'Delete', fr: 'Supprimer', de: 'Löschen', es: 'Eliminar', pt: 'Excluir' },
                 confirmDeleteMessage: { tr: '{name} metni kalıcı olarak silmek istediğinizden emin misiniz?', en: 'Are you sure you want to permanently delete the {name} text?', fr: 'Voulez-vous vraiment supprimer définitivement le texte {name} ?', de: 'Möchten Sie den {name}-Text wirklich endgültig löschen?', es: '¿Está seguro de que desea eliminar permanentemente el texto {name}?', pt: 'Tem certeza de que deseja excluir permanentemente o texto {name}?' },
+                confirmDeleteLibraryItemMessage: { tr: 'Bu kaydı kütüphaneden kalıcı olarak silmek istediğinizden emin misiniz?', en: 'Are you sure you want to permanently delete this entry from the library?', fr: 'Voulez-vous vraiment supprimer définitivement cette entrée de la bibliothèque ?', de: 'Möchten Sie diesen Eintrag wirklich endgültig aus der Bibliothek löschen?', es: '¿Está seguro de que desea eliminar permanentemente esta entrada de la biblioteca?', pt: 'Tem certeza de que deseja excluir permanentemente esta entrada da biblioteca?' },
                 original: { tr: 'Orijinal', en: 'Original', fr: 'Original', de: 'Original', es: 'Original', pt: 'Original' },
                 translated: { tr: 'Çevrilen', en: 'Translated', fr: 'Traduit', de: 'Übersetzter', es: 'Traducido', pt: 'Traduzido' },
                 errorNoTextToTranslate: {tr: "Çevirmek için önce metin oluşturun.", en: "First, create some text to translate.", fr: "Veuillez d'abord créer du texte à traduire.", de: "Erstellen Sie zuerst Text zum Übersetzen.", es: "Primero, cree texto para traducir.", pt: "Primeiro, crie um texto para traduzir."},
                 errorTranslation: {tr: "Çeviri sırasında bir hata oluştu.", en: "An error occurred during translation.", fr: "Une erreur s'est produite lors de la traduction.", de: "Während der Übersetzung ist ein Fehler aufgetreten.", es: "Ocurrió un error durante la traducción.", pt: "Ocorreu um erro durante a tradução."},
                 errorNoTextToShare: {tr: "Paylaşmak için önce metin oluşturun.", en: "First, create some text to share.", fr: "Veuillez d'abord créer du texte à partager.", de: "Erstellen Sie zuerst Text zum Teilen.", es: "Primero, cree texto para compartir.", pt: "Primeiro, crie um texto para compartilhar."},
                 errorNoTextToSpeak: {tr: "Seslendirmek için metin gerekli.", en: "Text is required to speak.", fr: "Le texte est requis pour parler.", de: "Zum Sprechen ist Text erforderlich.", es: "Se requiere texto para hablar.", pt: "É necessário texto para falar."},
-                copiedTooltip: { tr: "Kopyalandı!", en: "Copied!", fr: "Copié !", de: "Kopiert!", es: "¡Copiado!", pt: "Copiado!" }
+                 errorNoTextToSave: {tr: "Kaydetmek için metin gerekli.", en: "Text is required to save.", fr: "Le texte est requis pour enregistrer.", de: "Zum Speichern ist Text erforderlich.", es: "Se requiere texto para guardar.", pt: "É necessário texto para salvar."},
+                copiedTooltip: { tr: "Kopyalandı!", en: "Copied!", fr: "Copié !", de: "Kopiert!", es: "¡Copiado!", pt: "Copiado!" },
+                savedTooltip: { tr: "Kaydedildi!", en: "Saved!", fr: "Enregistré !", de: "Gespeichert!", es: "¡Guardado!", pt: "Salvo!" },
+                libraryButton: { tr: 'Kütüphane', en: 'Library', fr: 'Bibliothèque', de: 'Bibliothek', es: 'Biblioteca', pt: 'Biblioteca' },
+                libraryTitle: { tr: 'Kütüphane', en: 'Library', fr: 'Bibliothèque', de: 'Bibliothek', es: 'Biblioteca', pt: 'Biblioteca' },
+                noDocuments: { tr: 'Kütüphanede kayıtlı döküman bulunamadı.', en: 'No documents found in the library.', fr: 'Aucun document trouvé dans la bibliothèque.', de: 'Keine Dokumente in der Bibliothek gefunden.', es: 'No se encontraron documentos en la biblioteca.', pt: 'Nenhum documento encontrado na biblioteca.' },
             };
             
             // SVG İkonları
@@ -211,6 +240,7 @@
             const targetLangSelector = document.getElementById('targetLangSelector');
             const startButton = document.getElementById('startButton');
             const stopButton = document.getElementById('stopButton');
+            const saveButton = document.getElementById('saveButton');
             const copyButton = document.getElementById('copyButton');
             const shareButton = document.getElementById('shareButton');
             const deleteButton = document.getElementById('deleteButton');
@@ -227,11 +257,16 @@
             const transcriptImagePreview = document.getElementById('transcript-image-preview');
             const translatedImagePreview = document.getElementById('translated-image-preview');
 
+            const libraryButton = document.getElementById('libraryButton');
+            const libraryModal = document.getElementById('libraryModal');
+            const closeLibraryButton = document.getElementById('closeLibraryButton');
+            const libraryContainer = document.getElementById('library-container');
+
             const confirmationModal = document.getElementById('confirmationModal');
             const modalText = document.getElementById('modalText');
             const confirmDeleteButton = document.getElementById('confirmDelete');
             const cancelDeleteButton = document.getElementById('cancelDelete');
-            let elementToDelete = null;
+            let deleteCallback = null;
 
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const synth = window.speechSynthesis;
@@ -276,7 +311,7 @@
             }
             
             recognition = new SpeechRecognition();
-            recognition.continuous = false; // Set to false to handle results more granularly
+            recognition.continuous = false;
             recognition.interimResults = true;
 
             recognition.onstart = () => {
@@ -294,22 +329,15 @@
                     transcriptDiv.classList.add('ring-2', 'ring-cyan-400', 'cursor-text');
                     transcriptDiv.focus();
                 } else {
-                     // Automatically restart recognition if it stops prematurely
                     if (!startButton.disabled) return;
-                    try { 
-                        recognition.start(); 
-                    } catch(e) { 
-                        console.error("Recognition restart error:", e); 
-                        startButton.disabled = false;
-                        stopButton.disabled = true;
-                    }
+                    try { recognition.start(); } catch(e) { console.error("Recognition restart error:", e); }
                 }
             };
 
             recognition.onerror = (event) => {
                 if (event.error === 'no-speech' || event.error === 'audio-capture') {
                     console.warn('Speech recognition error ignored:', event.error);
-                    return; // Ignore common errors and let onend handle restart
+                    return;
                 }
                 statusDiv.textContent = 'Hata: ' + event.error;
                 console.error('Speech Recognition Error:', event.error);
@@ -361,22 +389,23 @@
                 handleSpeech(textToSpeak, speechLangCodes[targetLangSelector.value], speakTranslatedButton);
             });
 
-            deleteButton.addEventListener('click', () => showDeleteConfirmation(transcriptDiv, uiStrings.original[uiLangSelector.value]));
-            deleteTranslatedButton.addEventListener('click', () => showDeleteConfirmation(translatedTextDiv, uiStrings.translated[uiLangSelector.value]));
+            deleteButton.addEventListener('click', () => showDeleteConfirmation(uiStrings.original[uiLangSelector.value], () => {
+                transcriptDiv.innerHTML = '';
+                transcriptImagePreview.innerHTML = '';
+                originalImageUrls = [];
+                committed_transcript = '';
+                closeModal();
+            }));
+            deleteTranslatedButton.addEventListener('click', () => showDeleteConfirmation(uiStrings.translated[uiLangSelector.value], () => {
+                translatedTextDiv.innerHTML = '';
+                translatedImagePreview.innerHTML = '';
+                translatedImageUrls = [];
+                translationContainer.classList.add('hidden');
+                closeModal();
+            }));
             
             confirmDeleteButton.addEventListener('click', () => {
-                if (elementToDelete) {
-                    elementToDelete.innerHTML = '';
-                    if (elementToDelete === transcriptDiv) {
-                        transcriptImagePreview.innerHTML = '';
-                        originalImageUrls = [];
-                        committed_transcript = '';
-                    } else if (elementToDelete === translatedTextDiv) {
-                        translatedImagePreview.innerHTML = '';
-                        translatedImageUrls = [];
-                    }
-                }
-                closeModal();
+                if (deleteCallback) deleteCallback();
             });
             cancelDeleteButton.addEventListener('click', closeModal);
 
@@ -431,6 +460,136 @@
             transcriptDiv.addEventListener('input', (e) => handleInput(e, transcriptImagePreview, 'original'));
             translatedTextDiv.addEventListener('input', (e) => handleInput(e, translatedImagePreview, 'translated'));
 
+            // Kütüphane Fonksiyonları
+            const LIBRARY_KEY = 'katipLibrary';
+
+            function getLibrary() {
+                return JSON.parse(localStorage.getItem(LIBRARY_KEY) || '[]');
+            }
+
+            function saveLibrary(library) {
+                localStorage.setItem(LIBRARY_KEY, JSON.stringify(library));
+            }
+
+            saveButton.addEventListener('click', () => {
+                const originalText = transcriptDiv.innerText.trim();
+                if (!originalText) {
+                    showTemporaryStatus(uiStrings.errorNoTextToSave[uiLangSelector.value]);
+                    return;
+                }
+
+                const library = getLibrary();
+                const newDoc = {
+                    id: Date.now(),
+                    originalText: originalText,
+                    translatedText: translatedTextDiv.innerText.trim(),
+                    sourceLang: sourceLangSelector.value,
+                    targetLang: targetLangSelector.value,
+                    timestamp: new Date().toISOString()
+                };
+                library.unshift(newDoc); // Add to the beginning
+                saveLibrary(library);
+                showTemporaryTooltip(saveButton, uiStrings.savedTooltip[uiLangSelector.value]);
+            });
+
+            libraryButton.addEventListener('click', () => {
+                renderLibrary();
+                libraryModal.classList.remove('hidden');
+                libraryModal.classList.add('flex');
+            });
+
+            closeLibraryButton.addEventListener('click', () => {
+                libraryModal.classList.add('hidden');
+                libraryModal.classList.remove('flex');
+            });
+            
+            function renderLibrary() {
+                const library = getLibrary();
+                libraryContainer.innerHTML = '';
+                if (library.length === 0) {
+                    libraryContainer.innerHTML = `<p class="text-gray-400 text-center">${uiStrings.noDocuments[uiLangSelector.value]}</p>`;
+                    return;
+                }
+
+                library.forEach(doc => {
+                    const docEl = document.createElement('div');
+                    docEl.className = 'bg-gray-700 p-4 rounded-lg mb-4';
+                    
+                    const date = new Date(doc.timestamp).toLocaleString(uiLangSelector.value);
+                    const preview = doc.originalText.substring(0, 100) + (doc.originalText.length > 100 ? '...' : '');
+
+                    docEl.innerHTML = `
+                        <p class="text-gray-400 text-sm mb-2">${date}</p>
+                        <p class="text-gray-200 mb-4">${preview}</p>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button data-action="load" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-1 px-3 rounded-lg flex items-center gap-1 text-sm" title="${uiStrings.loadTooltip[uiLangSelector.value]}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                Yükle
+                            </button>
+                            <button data-action="share" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded-lg flex items-center gap-1 text-sm" title="${uiStrings.shareTooltip[uiLangSelector.value]}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                                Paylaş
+                            </button>
+                            <button data-action="speak" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-1 px-3 rounded-lg flex items-center gap-1 text-sm" title="${uiStrings.speakTooltip[uiLangSelector.value]}">
+                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                                Dinle
+                            </button>
+                             <button data-action="delete" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded-lg flex items-center gap-1 text-sm" title="${uiStrings.deleteTooltip[uiLangSelector.value]}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                Sil
+                            </button>
+                        </div>
+                    `;
+                    
+                    docEl.querySelector('[data-action="load"]').addEventListener('click', () => {
+                        loadDocument(doc.id);
+                        closeLibraryButton.click();
+                    });
+                    docEl.querySelector('[data-action="share"]').addEventListener('click', () => shareText(doc.originalText));
+                    docEl.querySelector('[data-action="speak"]').addEventListener('click', (e) => handleSpeech(doc.originalText, speechLangCodes[doc.sourceLang], e.currentTarget));
+                    docEl.querySelector('[data-action="delete"]').addEventListener('click', () => {
+                        showDeleteConfirmation(uiStrings.confirmDeleteLibraryItemMessage[uiLangSelector.value], () => {
+                            deleteDocument(doc.id);
+                            closeModal();
+                        });
+                    });
+
+                    libraryContainer.appendChild(docEl);
+                });
+            }
+
+            function loadDocument(id) {
+                const library = getLibrary();
+                const doc = library.find(d => d.id === id);
+                if (!doc) return;
+
+                resetAll();
+                transcriptDiv.innerText = doc.originalText;
+                committed_transcript = doc.originalText;
+                sourceLangSelector.value = doc.sourceLang;
+                targetLangSelector.value = doc.targetLang;
+
+                if (doc.translatedText) {
+                    translatedTextDiv.innerText = doc.translatedText;
+                    translationContainer.classList.remove('hidden');
+                    translatedTextDiv.contentEditable = true;
+                    translatedTextDiv.classList.add('ring-2', 'ring-cyan-400', 'cursor-text');
+                }
+                
+                transcriptDiv.contentEditable = true;
+                transcriptDiv.classList.add('ring-2', 'ring-cyan-400', 'cursor-text');
+                handleInput({ target: transcriptDiv }, transcriptImagePreview, 'original');
+                handleInput({ target: translatedTextDiv }, translatedImagePreview, 'translated');
+            }
+
+            function deleteDocument(id) {
+                let library = getLibrary();
+                library = library.filter(d => d.id !== id);
+                saveLibrary(library);
+                renderLibrary();
+            }
+
+            // Helper Functions
             function handleSpeech(text, langCode, button) {
                 if (synth.speaking) {
                     synth.cancel();
@@ -445,11 +604,9 @@
                 utterance.onstart = () => {
                     currentlySpeakingButton = button;
                     button.innerHTML = stopIconSVG;
-                    button.title = uiStrings.stopButton[uiLangSelector.value];
                 };
                 utterance.onend = () => {
                     button.innerHTML = speakIconSVG;
-                    button.title = uiStrings.speakTooltip[uiLangSelector.value];
                     currentlySpeakingButton = null;
                 };
                 utterance.onerror = (e) => {
@@ -475,11 +632,9 @@
                 translatedTextDiv.classList.remove('ring-2', 'ring-cyan-400', 'cursor-text');
             }
 
-            function showDeleteConfirmation(element, name) {
-                if (!element.innerText.trim()) return;
-                const lang = uiLangSelector.value;
-                modalText.textContent = uiStrings.confirmDeleteMessage[lang].replace('{name}', name);
-                elementToDelete = element;
+            function showDeleteConfirmation(message, callback) {
+                modalText.textContent = message;
+                deleteCallback = callback;
                 confirmationModal.classList.remove('hidden');
                 confirmationModal.classList.add('flex');
             }
@@ -487,7 +642,7 @@
             function closeModal() {
                 confirmationModal.classList.add('hidden');
                 confirmationModal.classList.remove('flex');
-                elementToDelete = null;
+                deleteCallback = null;
             }
             
             function handleInput(event, previewElement, type) {
@@ -517,11 +672,15 @@
             function copyText(text, buttonElement) {
                 if (text) {
                     navigator.clipboard.writeText(text).then(() => {
-                        const originalTitle = buttonElement.title;
-                        buttonElement.title = uiStrings.copiedTooltip[uiLangSelector.value];
-                        setTimeout(() => { buttonElement.title = originalTitle; }, 2000);
+                        showTemporaryTooltip(buttonElement, uiStrings.copiedTooltip[uiLangSelector.value]);
                     }).catch(err => console.error('Copy failed: ', err));
                 }
+            }
+
+            function showTemporaryTooltip(element, message) {
+                const originalTitle = element.title;
+                element.title = message;
+                setTimeout(() => { element.title = originalTitle; }, 2000);
             }
 
             async function shareText(text) {
